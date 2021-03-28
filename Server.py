@@ -11,8 +11,15 @@ client_socket = socket.socket()
 # Connect to Remote
 def Connect():
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    ADDR = (remote_ip.get(), int(remote_port.get()))
+    ADDR = (ip, int(host_port.get()))
     client_socket.connect(ADDR)
+    print(ADDR)
+
+def Listen():
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print(type(host_port.get()))
+    ADDR = (ip, int(host_port.get()))
+    server_socket.bind(ADDR)
     print(ADDR)
 
 # Receive Function
@@ -35,25 +42,25 @@ def send(event=None):  # event is passed by binders.
         socket.close()
     #     mainWindow.quit()
 
+
+# GUI
 mainWindow = Tk()
-mainWindow.title('Chat Application')
+mainWindow.title('Chat Application - Server')
 
 configFrame = Frame(mainWindow)
-# Set IP and Port
-Label(configFrame, text='IP Address').grid(row=0)
-Label(configFrame, text='Port').grid(row=1)
-remote_ip = Entry(configFrame)
-remote_ip.grid(row=0, column=1)
-remote_port = Entry(configFrame)
-remote_port.grid(row=1, column=1)
 
-ConnectButton = Button(mainWindow, text='Connect', width=25, command=Connect).grid(row=1,column=2)
+# Show Hostname
+Label(configFrame, text="My Hostname: ").grid(row=0,column = 0)
+Label(configFrame, text=hostname).grid(row=0,column = 1)
+# Show IP
+Label(configFrame, text="My IP: ").grid(row=1,column = 0)
+Label(configFrame, text=ip).grid(row=1,column = 1)
+# Set Port
+Label(configFrame, text='Port').grid(row=2,column=0)
+host_port = Entry(configFrame)
+host_port.grid(row=2, column=1)
 
-# Show Current IP and Hostname
-Label(configFrame, text="My IP: ").grid(row=2,column = 0)
-Label(configFrame, text=ip).grid(row=2,column = 1)
-Label(configFrame, text="My Hostname: ").grid(row=3,column = 0)
-Label(configFrame, text=hostname).grid(row=3,column = 1)
+ListenButton = Button(configFrame, text='Listen', width=25, command=Listen).grid(row=2,column=3)
 
 configFrame.grid(row=0)
 
