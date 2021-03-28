@@ -47,7 +47,7 @@ remote_ip.grid(row=0, column=1)
 remote_port = Entry(configFrame)
 remote_port.grid(row=1, column=1)
 
-ConnectButton = Button(mainWindow, text='Connect', width=25, command=Connect).grid(row=1,column=2)
+ConnectButton = Button(configFrame, text='Connect', width=25, command=Connect).grid(row=1,column=2)
 
 # Show Current IP and Hostname
 Label(configFrame, text="My IP: ").grid(row=2,column = 0)
@@ -74,9 +74,10 @@ msg_list.pack()
 messagesFrame.grid(row=4)
 
 # Label(mainWindow, text="Your Message: ").grid(row=3,column=0)
-message = Entry(mainWindow).grid(row=6,column=0)
-b1 = Button(mainWindow, text='Send Message', width=25, command=mainWindow.destroy).grid(row=6,column=1)
-# button.pack()
+SendFrame = Frame(mainWindow)
+message = Text(SendFrame,height=4).grid(row=6,column=0)
+sendButton = Button(SendFrame, text='Send Message', width=20, command=mainWindow.destroy).grid(row=6,column=1)
+SendFrame.grid(row=5)
 
 
 

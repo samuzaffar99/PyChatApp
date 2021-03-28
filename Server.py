@@ -81,10 +81,10 @@ msg_list.pack()
 messagesFrame.grid(row=4)
 
 # Label(mainWindow, text="Your Message: ").grid(row=3,column=0)
-message = Entry(mainWindow).grid(row=6,column=0)
-b1 = Button(mainWindow, text='Send Message', width=25, command=mainWindow.destroy).grid(row=6,column=1)
-# button.pack()
-
+SendFrame = Frame(mainWindow)
+message = Text(SendFrame,height=4).grid(row=6,column=0)
+sendButton = Button(SendFrame, text='Send Message', width=20, command=mainWindow.destroy).grid(row=6,column=1)
+SendFrame.grid(row=5)
 
 
 
