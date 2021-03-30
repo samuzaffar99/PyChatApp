@@ -16,7 +16,7 @@ def Connect():
     client_socket.connect(ADDR)
 
 # Receive Function
-def receive():
+def RecvMessage():
     """Handles receiving of messages."""
     while True:
         try:
@@ -26,8 +26,7 @@ def receive():
             break
 
 # Send Function
-def send(event=None):  # event is passed by binders.
-    """Handles sending of messages."""
+def SendMessage():
     msg = my_msg.get()
     my_msg.set("")  # Clears input field.
     client_socket.send(bytes(msg, "utf8"))
@@ -78,13 +77,13 @@ messagesFrame.grid(row=4)
 # Label(mainWindow, text="Your Message: ").grid(row=3,column=0)
 SendFrame = Frame(mainWindow)
 message = Text(SendFrame,height=4).grid(row=6,column=0)
-sendButton = Button(SendFrame, text='Send Message', width=20, command=mainWindow.destroy).grid(row=6,column=1)
+sendButton = Button(SendFrame, text='Send Message', width=20, command=SendMessage).grid(row=6,column=1)
 SendFrame.grid(row=5)
 
 
 
 
-receive_thread = Thread(target=receive)
+receive_thread = Thread(target=RecvMessage)
 receive_thread.start()
 
 mainWindow.mainloop()
