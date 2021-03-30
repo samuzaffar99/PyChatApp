@@ -5,15 +5,15 @@ from threading import Thread
 hostname = socket.gethostname()
 ip = socket.gethostbyname(hostname)
 BUFSIZ = 1024
-client_socket = socket.socket()
+client_socket = None
 
 
 # Connect to Remote
 def Connect():
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ADDR = (remote_ip.get(), int(remote_port.get()))
-    client_socket.connect(ADDR)
     print(ADDR)
+    client_socket.connect(ADDR)
 
 # Receive Function
 def receive():
@@ -43,8 +43,10 @@ configFrame = Frame(mainWindow)
 Label(configFrame, text='IP Address').grid(row=0)
 Label(configFrame, text='Port').grid(row=1)
 remote_ip = Entry(configFrame)
+remote_ip.insert(END, '127.0.0.1')
 remote_ip.grid(row=0, column=1)
 remote_port = Entry(configFrame)
+remote_port.insert(END, '8008')
 remote_port.grid(row=1, column=1)
 
 ConnectButton = Button(configFrame, text='Connect', width=25, command=Connect).grid(row=1,column=2)
