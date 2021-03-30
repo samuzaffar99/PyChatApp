@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox  
 import socket
 from threading import Thread
 
@@ -7,6 +8,7 @@ ip = socket.gethostbyname(hostname)
 BUFSIZ = 1024
 server_socket = None
 accept_thread = None
+recv_thread_list = []
 clientlist= []
 
 # Connect to Remote
@@ -47,6 +49,7 @@ def AcceptConn():
                 clientlist.append(client)
                 # client["so"]
                 receive_thread = Thread(target=RecvMessage,args=(so,))
+                recv_thread_list.append(receive_thread)
                 receive_thread.start()
         except OSError:  # Possibly client has left the chat.
             print("Accept Error")
@@ -83,7 +86,18 @@ def Broadcast(msg):
 
 
 
-
+def on_closing():
+    if messagebox.askokcancel("Quit", "Do you want to quit?"):
+        for thread in recv_thread_list:
+            thread.join()
+        print("done")
+        server_socket.close()
+        if(accept_thread and accept_thread.is_alive()):
+            print("true")
+            accept_thread.join()
+        print("done")
+        
+        mainWindow.destroy()
 # GUI
 mainWindow = Tk()
 mainWindow.title('Chat Application - Server')
@@ -122,4 +136,5 @@ message.grid(row=6,column=0)
 sendButton = Button(SendFrame, text='Send Message', width=20, command=SendMessage).grid(row=6,column=1)
 SendFrame.grid(row=5)
 
+mainWindow.protocol("WM_DELETE_WINDOW", on_closing)
 mainWindow.mainloop()
