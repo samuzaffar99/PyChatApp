@@ -8,7 +8,7 @@ BUFSIZ = 1024
 client_socket = socket.socket()
 server_socket = None
 accept_thread = None
-
+clientlist= []
 # Connect to Remote
 def Connect():
     global client_socket
@@ -32,21 +32,19 @@ def Listen():
     print(ADDR)
     # Bind Socket to address
     server_socket.bind(ADDR)
-    # Listen for incoming upto n clients
+    # Listen for incoming upto n = 5 clients
     server_socket.listen(5)
     # Thread to handle Incoming Connections
     accept_thread = Thread(target=AcceptConn)
     accept_thread.start()
-    
-    print(type(server_socket))
 
 def AcceptConn():
     while True:
         try:
-            print(1)
             if(server_socket):
                 client = so, (ip, port) = server_socket.accept()
                 print('Connected to ', ip, ':', str(port))
+                clientlist.append(client)
         except OSError:  # Possibly client has left the chat.
             print("Accept Error")
             break
@@ -59,6 +57,7 @@ def RecvMessage():
             if(client_socket):
                 msg = client_socket.recv(BUFSIZ).decode("utf8")
                 msg_list.insert(END, msg)
+                Broadcast(msg)
         except OSError:  # Possibly client has left the chat.
             print("Receive Error")
             break
@@ -73,7 +72,9 @@ def SendMessage():
         socket.close()
     #     mainWindow.quit()
 
-
+def Broadcast(msg):
+    for client in clientlist:
+            client.connection.send(msg)
 # GUI
 mainWindow = Tk()
 mainWindow.title('Chat Application - Server')
