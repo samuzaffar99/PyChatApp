@@ -6,8 +6,8 @@ hostname = socket.gethostname()
 ip = socket.gethostbyname(hostname)
 BUFSIZ = 1024
 client_socket = None
-
 receive_thread = None
+message = None
 
 # Connect to Remote
 def Connect():
@@ -32,8 +32,8 @@ def RecvMessage():
 
 # Send Function
 def SendMessage():
-    msg = my_msg.get()
-    my_msg.set("")  # Clears input field.
+    msg = message.get("1.0",END) # Retrives data from input field.
+    message.delete("1.0",END)  # Clears input field.
     client_socket.send(bytes(msg, "utf8"))
     if msg == "{quit}":
         socket.close()
@@ -65,11 +65,10 @@ configFrame.grid(row=0)
 
 # Message Receive Box
 messagesFrame = Frame(mainWindow)
-my_msg = StringVar()  # For the messages to be sent.
-my_msg.set("Type your messages here.")
 scrollbar = Scrollbar(messagesFrame)  # To navigate through past messages.
 # Following will contain the messages.
 msg_list = Listbox(messagesFrame, height=15, width=50, yscrollcommand=scrollbar.set)
+msg_list.insert(0, "Beginning of Chat")
 scrollbar.pack(side=RIGHT, fill=Y)
 msg_list.pack(side=LEFT, fill=BOTH)
 msg_list.pack()
@@ -77,7 +76,8 @@ messagesFrame.grid(row=4)
 
 # Label(mainWindow, text="Your Message: ").grid(row=3,column=0)
 SendFrame = Frame(mainWindow)
-message = Text(SendFrame,height=4).grid(row=6,column=0)
+message = Text(SendFrame,height=4)
+message.grid(row=6,column=0)
 sendButton = Button(SendFrame, text='Send Message', width=20, command=SendMessage).grid(row=6,column=1)
 SendFrame.grid(row=5)
 

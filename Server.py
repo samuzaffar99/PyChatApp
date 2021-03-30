@@ -5,7 +5,6 @@ from threading import Thread
 hostname = socket.gethostname()
 ip = socket.gethostbyname(hostname)
 BUFSIZ = 1024
-client_socket = socket.socket()
 server_socket = None
 accept_thread = None
 clientlist= []
@@ -46,21 +45,23 @@ def AcceptConn():
                 client = so, (ip, port) = server_socket.accept()
                 print('Connected to ', ip, ':', str(port))
                 clientlist.append(client)
+                # client["so"]
+                receive_thread = Thread(target=RecvMessage,args=(so,))
+                receive_thread.start()
         except OSError:  # Possibly client has left the chat.
             print("Accept Error")
             break
 
 # Receive Function
-def RecvMessage():
+def RecvMessage(client_socket):
     """Handles receiving of messages."""
     while True:
         try:
-            if(client_socket):
-                msg = client_socket.recv(BUFSIZ).decode("utf8")
-                msg_list.insert(END, msg)
-                Broadcast(msg)
+            msg = client_socket.recv(BUFSIZ).decode("utf8")
+            msg_list.insert(END, msg)
+            Broadcast(msg)
         except OSError:  # Possibly client has left the chat.
-            print("Receive Error")
+            print("Receive Error/Client Disconnected")
             break
 
 # Send Function
@@ -116,6 +117,4 @@ sendButton = Button(SendFrame, text='Send Message', width=20, command=SendMessag
 SendFrame.grid(row=5)
 
 
-receive_thread = Thread(target=RecvMessage)
-receive_thread.start()
 mainWindow.mainloop()
