@@ -10,6 +10,8 @@ server_socket = None
 accept_thread = None
 recv_thread_list = []
 clientlist= []
+ListenButton = None
+sendButton = None
 
 #AF stands for Address Family and PF stands for Protocol Family.
 #INET stands for INTERNET
@@ -28,6 +30,7 @@ def Connect():
 def Listen():
     global server_socket
     global accept_thread
+    
     if(accept_thread and accept_thread.is_alive()):
         accept_thread.join()
     local_ip = '127.0.0.1'
@@ -45,6 +48,18 @@ def Listen():
     # Thread to handle Incoming Connections
     accept_thread = Thread(target=AcceptConn)
     accept_thread.start()
+    # Change Button text and command to stop listening
+    ListenButton.configure(text = "Stop Listening!", command=StopListen)
+    # Enable Sending Messages
+    sendButton.configure(state='normal')
+
+def StopListen():
+    global server_socket
+    server_socket.close()
+    # Revert Button text and command to listen
+    ListenButton.configure(text = "Listen", command=Listen)
+    # Disable Sending Messages
+    sendButton.configure(state='disabled')
 
 def AcceptConn():
     while True:
@@ -78,10 +93,8 @@ def SendMessage():
     """Handles sending of messages."""
     msg = message.get("1.0",END) # Retrives data from input field.
     message.delete("1.0",END)  # Clears input field.
+    msg_list.insert(END, msg)
     Broadcast(msg)
-    if msg == "{quit}":
-        socket.close()
-    #     mainWindow.quit()
 
 def Broadcast(msg):
     for client in clientlist:
@@ -94,15 +107,18 @@ def Broadcast(msg):
 
 def on_closing():
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
-        for thread in recv_thread_list:
-            thread.join()
-        print("done")
-        server_socket.close()
+        if(server_socket):
+            server_socket.close()
         if(accept_thread and accept_thread.is_alive()):
             print("true")
             accept_thread.join()
         print("done")
-        
+        for client in clientlist:
+            client_socket, (ip, port) = client
+            client_socket.close()
+        for thread in recv_thread_list:
+            thread.join()
+        print("done")
         mainWindow.destroy()
 # GUI
 mainWindow = Tk()
@@ -122,7 +138,8 @@ host_port = Entry(configFrame)
 host_port.insert(END, '8008')
 host_port.grid(row=2, column=1)
 
-ListenButton = Button(configFrame, text='Listen', width=25, command=Listen).grid(row=2,column=3)
+ListenButton = Button(configFrame, text='Listen', width=25, command=Listen)
+ListenButton.grid(row=2,column=3)
 
 configFrame.grid(row=0)
 
@@ -130,7 +147,7 @@ configFrame.grid(row=0)
 messagesFrame = Frame(mainWindow)
 scrollbar = Scrollbar(messagesFrame)  # To navigate through past messages.
 # Following will contain the messages.
-msg_list = Listbox(messagesFrame, height=15, width=50, yscrollcommand=scrollbar.set)
+msg_list = Listbox(messagesFrame, height=15, width=50, bg="silver",yscrollcommand=scrollbar.set)
 scrollbar.pack(side=RIGHT, fill=Y)
 msg_list.pack(side=LEFT, fill=BOTH)
 msg_list.pack()
@@ -139,7 +156,8 @@ messagesFrame.grid(row=4)
 SendFrame = Frame(mainWindow)
 message = Text(SendFrame,height=4)
 message.grid(row=6,column=0)
-sendButton = Button(SendFrame, text='Send Message', width=20, command=SendMessage).grid(row=6,column=1)
+sendButton = Button(SendFrame, text='Send Message', width=20, command=SendMessage,state='disabled')
+sendButton.grid(row=6,column=1)
 SendFrame.grid(row=5)
 
 mainWindow.protocol("WM_DELETE_WINDOW", on_closing)

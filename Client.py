@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox  
 import socket
 from threading import Thread
 
@@ -42,8 +43,14 @@ def SendMessage():
 
 
 
-
-
+def on_closing():
+    if messagebox.askokcancel("Quit", "Do you want to quit?"):
+        client_socket.close()
+        if(receive_thread and receive_thread.is_alive()):
+            print("true")
+            receive_thread.join()
+        print("done")
+        mainWindow.destroy()
 # GUI
 mainWindow = Tk()
 mainWindow.title('Chat Application - Client')
@@ -87,4 +94,5 @@ message.grid(row=6,column=0)
 sendButton = Button(SendFrame, text='Send Message', width=20, command=SendMessage).grid(row=6,column=1)
 SendFrame.grid(row=5)
 
+mainWindow.protocol("WM_DELETE_WINDOW", on_closing)
 mainWindow.mainloop()
