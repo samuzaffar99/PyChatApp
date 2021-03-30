@@ -147,7 +147,8 @@ configFrame.grid(row=0)
 messagesFrame = Frame(mainWindow)
 scrollbar = Scrollbar(messagesFrame)  # To navigate through past messages.
 # Following will contain the messages.
-msg_list = Listbox(messagesFrame, height=15, width=50, bg="silver",yscrollcommand=scrollbar.set)
+msg_list = Listbox(messagesFrame, height=15, width=80, bg="silver",yscrollcommand=scrollbar.set)
+msg_list.insert(0, "- - - - - - Beginning of Chat - - - - - - -")
 scrollbar.pack(side=RIGHT, fill=Y)
 msg_list.pack(side=LEFT, fill=BOTH)
 msg_list.pack()
@@ -156,7 +157,7 @@ messagesFrame.grid(row=4)
 SendFrame = Frame(mainWindow)
 message = Text(SendFrame,height=4)
 message.grid(row=6,column=0)
-sendButton = Button(SendFrame, text='Send Message', width=20, command=SendMessage,state='disabled')
+sendButton = Button(SendFrame, text='Send Message', width=12, command=SendMessage,state='disabled')
 sendButton.grid(row=6,column=1)
 SendFrame.grid(row=5)
 

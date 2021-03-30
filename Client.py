@@ -11,15 +11,27 @@ receive_thread = None
 message = None
 
 # Connect to Remote
+def Disconnect():
+    if(client_socket):
+        client_socket.close()
+    ConnectButton.configure(text = "Connect", command=Connect)
+    sendButton.configure(state="disabled")
+
 def Connect():
     global client_socket
     global receive_thread
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ADDR = (remote_ip.get(), int(remote_port.get()))
     print(ADDR)
-    client_socket.connect(ADDR)
-    receive_thread = Thread(target=RecvMessage)
-    receive_thread.start()
+    try:
+        client_socket.connect(ADDR)
+        receive_thread = Thread(target=RecvMessage)
+        receive_thread.start()
+        ConnectButton.configure(text = "Disconnect", command=Disconnect)
+        sendButton.configure(state="normal")
+    except OSError as ex:  # Server Declines Connection
+            print("Error: ",ex)
+            print("Connection to Server failed")
 
 # Receive Function
 def RecvMessage():
@@ -45,7 +57,8 @@ def SendMessage():
 
 def on_closing():
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
-        client_socket.close()
+        if(client_socket):
+            client_socket.close()
         if(receive_thread and receive_thread.is_alive()):
             print("true")
             receive_thread.join()
@@ -66,7 +79,8 @@ remote_port = Entry(configFrame)
 remote_port.insert(END, '8008')
 remote_port.grid(row=1, column=1)
 
-ConnectButton = Button(configFrame, text='Connect', width=25, command=Connect).grid(row=1,column=2)
+ConnectButton = Button(configFrame, text='Connect', width=25, command=Connect)
+ConnectButton.grid(row=1,column=2)
 
 # Show Current IP and Hostname
 Label(configFrame, text="My IP: ").grid(row=2,column = 0)
@@ -80,8 +94,8 @@ configFrame.grid(row=0)
 messagesFrame = Frame(mainWindow)
 scrollbar = Scrollbar(messagesFrame)  # To navigate through past messages.
 # Following will contain the messages.
-msg_list = Listbox(messagesFrame, height=15, width=50, yscrollcommand=scrollbar.set)
-msg_list.insert(0, "Beginning of Chat")
+msg_list = Listbox(messagesFrame, height=15, width=50, bg="silver",yscrollcommand=scrollbar.set)
+msg_list.insert(0, "- - - - - - Beginning of Chat - - - - - - -")
 scrollbar.pack(side=RIGHT, fill=Y)
 msg_list.pack(side=LEFT, fill=BOTH)
 msg_list.pack()
@@ -91,7 +105,8 @@ messagesFrame.grid(row=4)
 SendFrame = Frame(mainWindow)
 message = Text(SendFrame,height=4)
 message.grid(row=6,column=0)
-sendButton = Button(SendFrame, text='Send Message', width=20, command=SendMessage).grid(row=6,column=1)
+sendButton = Button(SendFrame, text='Send Message', width=20, command=SendMessage,state='disabled')
+sendButton.grid(row=6,column=1)
 SendFrame.grid(row=5)
 
 mainWindow.protocol("WM_DELETE_WINDOW", on_closing)
