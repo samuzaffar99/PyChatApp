@@ -11,6 +11,12 @@ accept_thread = None
 recv_thread_list = []
 clientlist= []
 
+#AF stands for Address Family and PF stands for Protocol Family.
+#INET stands for INTERNET
+#AF_INET is for IPV4
+
+#SOCK_STREAM means it's for streaming and it uses TCP
+
 # Connect to Remote
 def Connect():
     global client_socket
