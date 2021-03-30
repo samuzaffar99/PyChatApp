@@ -7,13 +7,18 @@ ip = socket.gethostbyname(hostname)
 BUFSIZ = 1024
 client_socket = None
 
+receive_thread = None
 
 # Connect to Remote
 def Connect():
+    global client_socket
+    global receive_thread
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ADDR = (remote_ip.get(), int(remote_port.get()))
     print(ADDR)
     client_socket.connect(ADDR)
+    receive_thread = Thread(target=RecvMessage)
+    receive_thread.start()
 
 # Receive Function
 def RecvMessage():
@@ -58,10 +63,6 @@ Label(configFrame, text=hostname).grid(row=3,column = 1)
 
 configFrame.grid(row=0)
 
-
-
-
-
 # Message Receive Box
 messagesFrame = Frame(mainWindow)
 my_msg = StringVar()  # For the messages to be sent.
@@ -79,11 +80,5 @@ SendFrame = Frame(mainWindow)
 message = Text(SendFrame,height=4).grid(row=6,column=0)
 sendButton = Button(SendFrame, text='Send Message', width=20, command=SendMessage).grid(row=6,column=1)
 SendFrame.grid(row=5)
-
-
-
-
-receive_thread = Thread(target=RecvMessage)
-receive_thread.start()
 
 mainWindow.mainloop()

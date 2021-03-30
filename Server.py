@@ -9,6 +9,7 @@ client_socket = socket.socket()
 server_socket = None
 accept_thread = None
 clientlist= []
+
 # Connect to Remote
 def Connect():
     global client_socket
@@ -97,10 +98,6 @@ ListenButton = Button(configFrame, text='Listen', width=25, command=Listen).grid
 
 configFrame.grid(row=0)
 
-
-
-
-
 # Message Receive Box
 messagesFrame = Frame(mainWindow)
 my_msg = StringVar()  # For the messages to be sent.
@@ -115,9 +112,8 @@ messagesFrame.grid(row=4)
 
 SendFrame = Frame(mainWindow)
 message = Text(SendFrame,height=4).grid(row=6,column=0)
-sendButton = Button(SendFrame, text='Send Message', width=20, command=mainWindow.destroy).grid(row=6,column=1)
+sendButton = Button(SendFrame, text='Send Message', width=20, command=SendMessage).grid(row=6,column=1)
 SendFrame.grid(row=5)
-
 
 
 receive_thread = Thread(target=RecvMessage)
