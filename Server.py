@@ -7,48 +7,64 @@ ip = socket.gethostbyname(hostname)
 BUFSIZ = 1024
 client_socket = socket.socket()
 server_socket = None
+accept_thread = None
 
 # Connect to Remote
 def Connect():
+    global client_socket
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ADDR = (ip, int(host_port.get()))
     print(ADDR)
     client_socket.connect(ADDR)
 
 def Listen():
+    global server_socket
+    global accept_thread
+    if(accept_thread and accept_thread.is_alive()):
+        accept_thread.join()
     local_ip = '127.0.0.1'
+    # Create Server Socket
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # Allow immediate restart of server
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     print(type(host_port.get()))
     ADDR = (local_ip, int(host_port.get()))
     print(ADDR)
+    # Bind Socket to address
     server_socket.bind(ADDR)
+    # Listen for incoming upto n clients
     server_socket.listen(5)
+    # Thread to handle Incoming Connections
     accept_thread = Thread(target=AcceptConn)
     accept_thread.start()
+    
+    print(type(server_socket))
 
 def AcceptConn():
     while True:
         try:
-            client = so, (ip, port) = server_socket.accept()
-            print('Connected to ', ip, ':', str(port))
+            print(1)
+            if(server_socket):
+                client = so, (ip, port) = server_socket.accept()
+                print('Connected to ', ip, ':', str(port))
         except OSError:  # Possibly client has left the chat.
-            print("Error")
+            print("Accept Error")
             break
 
 # Receive Function
-def receive():
+def RecvMessage():
     """Handles receiving of messages."""
     while True:
         try:
-            msg = client_socket.recv(BUFSIZ).decode("utf8")
-            msg_list.insert(END, msg)
+            if(client_socket):
+                msg = client_socket.recv(BUFSIZ).decode("utf8")
+                msg_list.insert(END, msg)
         except OSError:  # Possibly client has left the chat.
-            print("Error")
+            print("Receive Error")
             break
 
 # Send Function
-def send(event=None):  # event is passed by binders.
+def SendMessage():
     """Handles sending of messages."""
     msg = my_msg.get()
     my_msg.set("")  # Clears input field.
@@ -103,6 +119,6 @@ SendFrame.grid(row=5)
 
 
 
-receive_thread = Thread(target=receive)
+receive_thread = Thread(target=RecvMessage)
 receive_thread.start()
 mainWindow.mainloop()
