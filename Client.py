@@ -20,18 +20,21 @@ def Disconnect():
 def Connect():
     global client_socket
     global receive_thread
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    ADDR = (remote_ip.get(), int(remote_port.get()))
-    print(ADDR)
+
     try:
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        ADDR = (remote_ip.get(), int(remote_port.get()))
+        print(ADDR)
         client_socket.connect(ADDR)
         receive_thread = Thread(target=RecvMessage)
         receive_thread.start()
         ConnectButton.configure(text = "Disconnect", command=Disconnect)
         sendButton.configure(state="normal")
     except OSError as ex:  # Server Declines Connection
-            print("Error: ",ex)
+            # print("Error: ",ex)
             print("Connection to Server failed")
+    except ValueError:
+        print("Port should be a valid number")
 
 # Receive Function
 def RecvMessage():
