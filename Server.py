@@ -67,16 +67,23 @@ def RecvMessage(client_socket):
 # Send Function
 def SendMessage():
     """Handles sending of messages."""
-    msg = my_msg.get()
-    my_msg.set("")  # Clears input field.
-    client_socket.send(bytes(msg, "utf8"))
+    msg = message.get("1.0",END) # Retrives data from input field.
+    message.delete("1.0",END)  # Clears input field.
+    Broadcast(msg)
     if msg == "{quit}":
         socket.close()
     #     mainWindow.quit()
 
 def Broadcast(msg):
     for client in clientlist:
-            client.connection.send(msg)
+            client_socket, (ip, port) = client
+            client_socket.sendall(bytes(msg, "utf8"))
+
+
+
+
+
+
 # GUI
 mainWindow = Tk()
 mainWindow.title('Chat Application - Server')
@@ -101,8 +108,6 @@ configFrame.grid(row=0)
 
 # Message Receive Box
 messagesFrame = Frame(mainWindow)
-my_msg = StringVar()  # For the messages to be sent.
-my_msg.set("Type your messages here.")
 scrollbar = Scrollbar(messagesFrame)  # To navigate through past messages.
 # Following will contain the messages.
 msg_list = Listbox(messagesFrame, height=15, width=50, yscrollcommand=scrollbar.set)
@@ -112,9 +117,9 @@ msg_list.pack()
 messagesFrame.grid(row=4)
 
 SendFrame = Frame(mainWindow)
-message = Text(SendFrame,height=4).grid(row=6,column=0)
+message = Text(SendFrame,height=4)
+message.grid(row=6,column=0)
 sendButton = Button(SendFrame, text='Send Message', width=20, command=SendMessage).grid(row=6,column=1)
 SendFrame.grid(row=5)
-
 
 mainWindow.mainloop()

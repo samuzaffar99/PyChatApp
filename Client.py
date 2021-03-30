@@ -39,6 +39,12 @@ def SendMessage():
         socket.close()
     #     mainWindow.quit()
 
+
+
+
+
+
+# GUI
 mainWindow = Tk()
 mainWindow.title('Chat Application - Client')
 
