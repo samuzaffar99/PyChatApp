@@ -15,8 +15,6 @@ clientlist= []
 
 #SOCK_STREAM means it's for streaming and it uses TCP
 
-
-
 # Connect to Remote
 def Connect():
     global client_socket
