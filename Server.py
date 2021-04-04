@@ -56,12 +56,22 @@ def Listen():
 # Stop Server from listening
 def StopListen():
     global server_socket
+    global client_list
     server_socket.close()
     # Revert Button text and command to listen
     ListenButton.configure(text = "Listen", command=Listen)
     # Disable Sending Messages
     sendButton.configure(state='disabled')
     uname.configure(state="normal")
+    for client in clientlist:
+        client_socket, (ip, port) = client
+        client_socket.close()
+    if(accept_thread and accept_thread.is_alive()):
+        accept_thread.join()
+    for thread in recv_thread_list:
+        thread.join()
+ 
+    client_list = []
 
 def AcceptConn():
     while True:
@@ -86,6 +96,12 @@ def RecvMessage(client_socket):
             msg_list.insert(END, msg)
             Broadcast(msg)
         except OSError:  # Client has left the chat.
+            client_socket.close()
+            # try:
+            #     client_socket.close()
+            # except OSError:
+            #     print("Not a socket")
+            # clientlist.remove(client_socket)
             print("Receive Error/Client Disconnected")
             break
 
@@ -100,7 +116,10 @@ def SendMessage():
 def Broadcast(msg):
     for client in clientlist:
             client_socket, (ip, port) = client
-            client_socket.sendall(bytes(msg, "utf8"))
+            try:
+                client_socket.sendall(bytes(msg, "utf8"))
+            except ConnectionResetError:
+                clientlist.remove(client)
 
 
 
@@ -111,15 +130,12 @@ def on_closing():
         if(server_socket):
             server_socket.close()
         if(accept_thread and accept_thread.is_alive()):
-            print("true")
             accept_thread.join()
-        print("done")
         for client in clientlist:
             client_socket, (ip, port) = client
             client_socket.close()
         for thread in recv_thread_list:
             thread.join()
-        print("done")
         mainWindow.destroy()
 # GUI
 mainWindow = Tk()

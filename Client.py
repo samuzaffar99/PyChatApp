@@ -24,10 +24,12 @@ def Connect():
     global receive_thread
 
     try:
-        # Attempt connection to server
+        # Assign resusable socket
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         ADDR = (remote_ip.get(), int(remote_port.get()))
         print("Server Address: ",ADDR)
+        # Attempt connection to server
         client_socket.connect(ADDR)
         receive_thread = Thread(target=RecvMessage)
         receive_thread.start()
@@ -36,7 +38,7 @@ def Connect():
         sendButton.configure(state="normal")
         uname.configure(state="disabled")
         # Announce to server that you have joined
-        client_socket.send((uname.get() + " has joined the server" ).encode('utf-8'))
+        client_socket.sendall((uname.get() + " has joined the server" ).encode('utf-8'))
     except OSError as ex:  # Server Declines Connection
             # print("Error: ",ex)
             print("Connection to Server failed")
@@ -51,7 +53,10 @@ def RecvMessage():
             msg = client_socket.recv(BUFSIZ).decode("utf8")
             msg_list.insert(END, msg)
         except OSError:  # Possibly client has left the chat.
+            print("You have been disconnected from the server")
+            Disconnect()
             break
+    
 
 # Send Function
 def SendMessage():
