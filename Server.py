@@ -53,6 +53,7 @@ def Listen():
     # Enable Sending Messages
     sendButton.configure(state='normal')
 
+# Stop Server from listening
 def StopListen():
     global server_socket
     server_socket.close()
@@ -60,6 +61,7 @@ def StopListen():
     ListenButton.configure(text = "Listen", command=Listen)
     # Disable Sending Messages
     sendButton.configure(state='disabled')
+    uname.configure(state="normal")
 
 def AcceptConn():
     while True:
@@ -68,11 +70,10 @@ def AcceptConn():
                 client = so, (ip, port) = server_socket.accept()
                 print('Connected to ', ip, ':', str(port))
                 clientlist.append(client)
-                # client["so"]
                 receive_thread = Thread(target=RecvMessage,args=(so,))
                 recv_thread_list.append(receive_thread)
                 receive_thread.start()
-        except OSError:  # Possibly client has left the chat.
+        except OSError:  # Client has left the chat.
             print("Accept Error")
             break
 
@@ -84,18 +85,18 @@ def RecvMessage(client_socket):
             msg = client_socket.recv(BUFSIZ).decode("utf8")
             msg_list.insert(END, msg)
             Broadcast(msg)
-        except OSError:  # Possibly client has left the chat.
+        except OSError:  # Client has left the chat.
             print("Receive Error/Client Disconnected")
             break
 
 # Send Function
 def SendMessage():
-    """Handles sending of messages."""
-    msg = message.get("1.0",END) # Retrives data from input field.
+    msg = uname.get() + ": " + message.get("1.0",END) # Retrives data from input field.
     message.delete("1.0",END)  # Clears input field.
     msg_list.insert(END, msg)
     Broadcast(msg)
 
+# Broadcast to all clients
 def Broadcast(msg):
     for client in clientlist:
             client_socket, (ip, port) = client
@@ -104,7 +105,7 @@ def Broadcast(msg):
 
 
 
-
+# Function called on exit to terminate running threads and close sockets
 def on_closing():
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
         if(server_socket):
@@ -129,6 +130,11 @@ configFrame = Frame(mainWindow)
 # Show Hostname
 Label(configFrame, text="My Hostname: ").grid(row=0,column = 0)
 Label(configFrame, text=hostname).grid(row=0,column = 1)
+# Set Username
+Label(configFrame, text='Name').grid(row=0,column=2)
+uname = Entry(configFrame,state="normal")
+uname.grid(row=0,column=3)
+uname.insert(END,"Host")
 # Show IP
 Label(configFrame, text="My IP: ").grid(row=1,column = 0)
 Label(configFrame, text=ip).grid(row=1,column = 1)

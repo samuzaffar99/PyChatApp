@@ -10,26 +10,33 @@ client_socket = None
 receive_thread = None
 message = None
 
-# Connect to Remote
+# Disconnect From the server
 def Disconnect():
     if(client_socket):
         client_socket.close()
     ConnectButton.configure(text = "Connect", command=Connect)
     sendButton.configure(state="disabled")
+    uname.configure(state="normal")
 
+# Connect to Remote
 def Connect():
     global client_socket
     global receive_thread
 
     try:
+        # Attempt connection to server
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         ADDR = (remote_ip.get(), int(remote_port.get()))
-        print(ADDR)
+        print("Server Address: ",ADDR)
         client_socket.connect(ADDR)
         receive_thread = Thread(target=RecvMessage)
         receive_thread.start()
+        # Change Buttons and entry states
         ConnectButton.configure(text = "Disconnect", command=Disconnect)
         sendButton.configure(state="normal")
+        uname.configure(state="disabled")
+        # Announce to server that you have joined
+        client_socket.send((uname.get() + " has joined the server" ).encode('utf-8'))
     except OSError as ex:  # Server Declines Connection
             # print("Error: ",ex)
             print("Connection to Server failed")
@@ -38,7 +45,7 @@ def Connect():
 
 # Receive Function
 def RecvMessage():
-    """Handles receiving of messages."""
+    # loop that waits for messages
     while True:
         try:
             msg = client_socket.recv(BUFSIZ).decode("utf8")
@@ -50,30 +57,31 @@ def RecvMessage():
 def SendMessage():
     msg = message.get("1.0",END) # Retrives data from input field.
     message.delete("1.0",END)  # Clears input field.
-    client_socket.send(bytes(msg, "utf8"))
-    if msg == "{quit}":
-        socket.close()
-    #     mainWindow.quit()
+    client_socket.send(bytes(uname.get() + ": " + msg, "utf8")) # Send message
 
 
 
 
+
+# Function called on exit to terminate running threads and close sockets
 def on_closing():
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
         if(client_socket):
             client_socket.close()
         if(receive_thread and receive_thread.is_alive()):
-            print("true")
             receive_thread.join()
-        print("done")
         mainWindow.destroy()
 # GUI
 mainWindow = Tk()
 mainWindow.title('Chat Application - Client')
 
 configFrame = Frame(mainWindow)
-# Set IP and Port
-Label(configFrame, text='IP Address').grid(row=0)
+# Set IP and Port along with username
+Label(configFrame, text='IP Address').grid(row=0,column=0)
+Label(configFrame, text='Name').grid(row=0,column=2)
+uname = Entry(configFrame,state="normal")
+uname.grid(row=0,column=3)
+uname.insert(END,"User")
 Label(configFrame, text='Port').grid(row=1)
 remote_ip = Entry(configFrame)
 remote_ip.insert(END, '127.0.0.1')
@@ -95,7 +103,7 @@ configFrame.grid(row=0)
 
 # Message Receive Box
 messagesFrame = Frame(mainWindow)
-scrollbar = Scrollbar(messagesFrame)  # To navigate through past messages.
+scrollbar = Scrollbar(messagesFrame)  # To navigate through previous messages.
 # Following will contain the messages.
 msg_list = Listbox(messagesFrame, height=15, width=50, bg="silver",yscrollcommand=scrollbar.set)
 msg_list.insert(0, "- - - - - - Beginning of Chat - - - - - - -")
@@ -104,7 +112,7 @@ msg_list.pack(side=LEFT, fill=BOTH)
 msg_list.pack()
 messagesFrame.grid(row=4)
 
-# Label(mainWindow, text="Your Message: ").grid(row=3,column=0)
+# Send Message Box
 SendFrame = Frame(mainWindow)
 message = Text(SendFrame,height=4)
 message.grid(row=6,column=0)
