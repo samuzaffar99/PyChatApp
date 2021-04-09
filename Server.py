@@ -30,28 +30,32 @@ def Connect():
 def Listen():
     global server_socket
     global accept_thread
-    
-    if(accept_thread and accept_thread.is_alive()):
-        accept_thread.join()
-    local_ip = '127.0.0.1'
-    # Create Server Socket
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # Allow immediate restart of server
-    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    print(type(host_port.get()))
-    ADDR = (local_ip, int(host_port.get()))
-    print(ADDR)
-    # Bind Socket to address
-    server_socket.bind(ADDR)
-    # Listen for incoming upto n = 5 clients
-    server_socket.listen(5)
-    # Thread to handle Incoming Connections
-    accept_thread = Thread(target=AcceptConn)
-    accept_thread.start()
-    # Change Button text and command to stop listening
-    ListenButton.configure(text = "Stop Listening!", command=StopListen)
-    # Enable Sending Messages
-    sendButton.configure(state='normal')
+    try:
+        if(accept_thread and accept_thread.is_alive()):
+            accept_thread.join()
+        local_ip = '127.0.0.1'
+        # Create Server Socket
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Allow immediate restart of server
+        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        print(type(host_port.get()))
+        ADDR = (local_ip, int(host_port.get()))
+        print(ADDR)
+        # Bind Socket to address
+        server_socket.bind(ADDR)
+        # Listen for incoming upto n = 5 clients
+        server_socket.listen(5)
+        # Thread to handle Incoming Connections
+        accept_thread = Thread(target=AcceptConn)
+        accept_thread.start()
+        # Change Button text and command to stop listening
+        ListenButton.configure(text = "Stop Listening!", command=StopListen)
+        # Enable Sending Messages
+        sendButton.configure(state='normal')
+    except OverflowError:
+        print("Port number too large")
+    except ValueError:
+        print("Invalid Port number")
 
 # Stop Server from listening
 def StopListen():
