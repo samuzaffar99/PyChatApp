@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import messagebox  
+from tkinter import messagebox
 import socket
 from threading import Thread
 
